@@ -1,0 +1,26 @@
+{
+  "name": "nomute",
+  "version": "1.0.0",
+  "description": "A library to work with immutable data",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "type": "commonjs",
+  "files": [
+    "/lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "scripts": {
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "lint": "tsc"
+  },
+  "keywords": [
+    "immutable data",
+    "functional programming"
+  ],
+  "author": "Rahul Rao",
+  "license": "MIT"
+}
