@@ -21,18 +21,29 @@ export const set = function <T>(
  * Immutably update an object.
  * @param {T} object
  * @param {K} key
- * @param {(value: T[K]) => T[K]} modify
+ * @param {((value: T[K]) => T[K]) | T[K]} modify
  * @returns {T}
  */
-export const update = function <T, K extends keyof T>(
+export function update<T, K extends keyof T>(
+  object: T,
+  key: K,
+  modify: T[K]
+): T;
+export function update<T, K extends keyof T>(
+  object: T,
+  key: K,
+  modify: (value: T[K]) => T[K]
+): T;
+export function update<T, K extends keyof T>(
   object: T,
   key: K,
   modify: (value: T[K]) => T[K]
 ): T {
   const objectCopy = { ...object };
+  if (typeof modify !== "function") return set(object, key, modify);
   const updatedValue = modify(objectCopy[key]);
   return set(object, key, updatedValue);
-};
+}
 
 export const nestedUpdate = function <T, K extends keyof T>(
   object: T,
