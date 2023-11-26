@@ -7,11 +7,12 @@ import { shiftBy } from "../arrayUtils/";
  * @param {T[keyof T]} newValue
  * @returns {T}
  */
-export const set = function <T>(
+export const set = function <T extends Object>(
   object: T,
   key: keyof T,
   newValue: T[keyof T]
 ): T {
+  if (!object.hasOwnProperty(key)) throw new Error("Invalid object key.");
   const copy = { ...object };
   copy[key] = newValue;
   return copy;
@@ -24,17 +25,17 @@ export const set = function <T>(
  * @param {((value: T[K]) => T[K]) | T[K]} modify
  * @returns {T}
  */
-export function update<T, K extends keyof T>(
+export function update<T extends Object, K extends keyof T>(
   object: T,
   key: K,
   modify: T[K]
 ): T;
-export function update<T, K extends keyof T>(
+export function update<T extends Object, K extends keyof T>(
   object: T,
   key: K,
   modify: (value: T[K]) => T[K]
 ): T;
-export function update<T, K extends keyof T>(
+export function update<T extends Object, K extends keyof T>(
   object: T,
   key: K,
   modify: (value: T[K]) => T[K]
@@ -45,19 +46,35 @@ export function update<T, K extends keyof T>(
   return set(object, key, updatedValue);
 }
 
-export const nestedUpdate = function <T, K extends keyof T>(
+export function nestedUpdate<T extends Object, K extends keyof T>(
   object: T,
-  keys: K[],
-  modify: (value: T[K]) => T[K]
+  keys: K[] | any,
+  modify: T[K] | any
+): T;
+export function nestedUpdate<T extends Object, K extends keyof T>(
+  object: T,
+  keys: K[] | any,
+  modify: (value: T[K] | any) => T[K] | any
 ): T {
-  // @ts-ignore
-  if (keys.length === 0) return modify(object);
+  /**
+   * If only one key is left and modify is not a function
+   * return then update the object using the update function.
+   */
+  if (keys.length === 1 && typeof modify !== "function")
+    return update(object, keys[0], modify);
+
+  /**
+   * If there are no keys remaining and modify is a function
+   * then execute modify to modify the object which is now
+   * a primitive value.
+   */
+  if (keys.length === 0 && typeof modify === "function")
+    return modify(object as T[K]) as T;
+
   const firstKey = keys[0];
   const remainingKeys = shiftBy(keys);
 
-  // @ts-ignore
   return update(object, firstKey, (value) => {
-    // @ts-ignore
-    return nestedUpdate(value, remainingKeys, modify);
+    return nestedUpdate(value as T, remainingKeys, modify) as T[K];
   });
-};
+}
