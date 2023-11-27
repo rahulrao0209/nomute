@@ -46,6 +46,12 @@ export function update<T extends Object, K extends keyof T>(
   return set(object, key, updatedValue);
 }
 
+/**
+ * Immutably update deeply nested objects.
+ * @param {T extends Object} object
+ * @param {K[] | any} keys - Array of keys denoting the path to the nested value to be updated.
+ * @param { ((value: T[K] | any) => T[K] | any) | T[K] | any} modify
+ */
 export function nestedUpdate<T extends Object, K extends keyof T>(
   object: T,
   keys: K[] | any,
